@@ -8,12 +8,12 @@
  * @packageDocumentation
  */
 
-import { Rules, SquareName, Move, isDrop } from './types.js';
-import { makeSquare, squareFile } from './util.js';
-import { Position } from './chess.js';
+import { Rules, SquareName, Move, isDrop } from './types.js'
+import { makeSquare, squareFile } from './util.js'
+import { Position } from './chess.js'
 
 export interface ChessgroundDestsOpts {
-  chess960?: boolean;
+  chess960?: boolean
 }
 
 /**
@@ -24,27 +24,27 @@ export interface ChessgroundDestsOpts {
  * correctly.
  */
 export const chessgroundDests = (pos: Position, opts?: ChessgroundDestsOpts): Map<SquareName, SquareName[]> => {
-  const result = new Map();
-  const ctx = pos.ctx();
+  const result = new Map()
+  const ctx = pos.ctx()
   for (const [from, squares] of pos.allDests(ctx)) {
     if (squares.nonEmpty()) {
-      const d = Array.from(squares, makeSquare);
+      const d = Array.from(squares, makeSquare)
       if (!opts?.chess960 && from === ctx.king && squareFile(from) === 4) {
         // Chessground needs both types of castling dests and filters based on
         // a rookCastles setting.
-        if (squares.has(0)) d.push('c1');
-        else if (squares.has(56)) d.push('c8');
-        if (squares.has(7)) d.push('g1');
-        else if (squares.has(63)) d.push('g8');
+        if (squares.has(0)) d.push('c1')
+        else if (squares.has(56)) d.push('c8')
+        if (squares.has(7)) d.push('g1')
+        else if (squares.has(63)) d.push('g8')
       }
-      result.set(makeSquare(from), d);
+      result.set(makeSquare(from), d)
     }
   }
-  return result;
-};
+  return result
+}
 
 export const chessgroundMove = (move: Move): SquareName[] =>
-  isDrop(move) ? [makeSquare(move.to)] : [makeSquare(move.from), makeSquare(move.to)];
+  isDrop(move) ? [makeSquare(move.to)] : [makeSquare(move.from), makeSquare(move.to)]
 
 export const scalachessCharPair = (move: Move): string =>
   isDrop(move)
@@ -57,7 +57,7 @@ export const scalachessCharPair = (move: Move): string =>
         move.promotion
           ? 35 + 64 + 8 * ['queen', 'rook', 'bishop', 'knight', 'king'].indexOf(move.promotion) + squareFile(move.to)
           : 35 + move.to
-      );
+      )
 
 export const lichessRules = (
   variant:
@@ -76,31 +76,31 @@ export const lichessRules = (
     case 'standard':
     case 'chess960':
     case 'fromPosition':
-      return 'chess';
+      return 'chess'
     case 'threeCheck':
-      return '3check';
+      return '3check'
     case 'kingOfTheHill':
-      return 'kingofthehill';
+      return 'kingofthehill'
     case 'racingKings':
-      return 'racingkings';
+      return 'racingkings'
     default:
-      return variant;
+      return variant
   }
-};
+}
 
 export const lichessVariant = (
   rules: Rules
 ): 'standard' | 'antichess' | 'kingOfTheHill' | 'threeCheck' | 'atomic' | 'horde' | 'racingKings' | 'crazyhouse' => {
   switch (rules) {
     case 'chess':
-      return 'standard';
+      return 'standard'
     case '3check':
-      return 'threeCheck';
+      return 'threeCheck'
     case 'kingofthehill':
-      return 'kingOfTheHill';
+      return 'kingOfTheHill'
     case 'racingkings':
-      return 'racingKings';
+      return 'racingKings'
     default:
-      return rules;
+      return rules
   }
-};
+}

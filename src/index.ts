@@ -23,8 +23,8 @@ export {
   isNormal,
   Rules,
   RULES,
-  Outcome,
-} from './types.js';
+  Outcome
+} from './types.js'
 
 export {
   charToRole,
@@ -37,10 +37,10 @@ export {
   parseUci,
   roleToChar,
   squareFile,
-  squareRank,
-} from './util.js';
+  squareRank
+} from './util.js'
 
-export { SquareSet } from './squareSet.js';
+export { SquareSet } from './squareSet.js'
 
 export {
   attacks,
@@ -51,25 +51,25 @@ export {
   pawnAttacks,
   queenAttacks,
   ray,
-  rookAttacks,
-} from './attacks.js';
+  rookAttacks
+} from './attacks.js'
 
-export { Board } from './board.js';
+export { Board } from './board.js'
 
-export { Material, MaterialSide, RemainingChecks, Setup, defaultSetup } from './setup.js';
+export { Material, MaterialSide, RemainingChecks, Setup, defaultSetup } from './setup.js'
 
-export { IllegalSetup, Castles, Chess, Position, PositionError, Context } from './chess.js';
+export { IllegalSetup, Castles, Chess, Position, PositionError, Context } from './chess.js'
 
-export * as compat from './compat.js';
+export * as compat from './compat.js'
 
-export * as debug from './debug.js';
+export * as debug from './debug.js'
 
-export * as fen from './fen.js';
+export * as fen from './fen.js'
 
-export * as san from './san.js';
+export * as san from './san.js'
 
-export * as transform from './transform.js';
+export * as transform from './transform.js'
 
-export * as variant from './variant.js';
+export * as variant from './variant.js'
 
-export * as pgn from './pgn.js';
+export * as pgn from './pgn.js'

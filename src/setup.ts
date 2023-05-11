@@ -1,63 +1,63 @@
-import { Color, Role, ROLES, Square, ByColor, ByRole } from './types.js';
-import { SquareSet } from './squareSet.js';
-import { Board, boardEquals } from './board.js';
+import { Color, Role, ROLES, Square, ByColor, ByRole } from './types.js'
+import { SquareSet } from './squareSet.js'
+import { Board, boardEquals } from './board.js'
 
 export class MaterialSide implements ByRole<number> {
-  pawn: number;
-  knight: number;
-  bishop: number;
-  rook: number;
-  queen: number;
-  king: number;
+  pawn: number
+  knight: number
+  bishop: number
+  rook: number
+  queen: number
+  king: number
 
   private constructor() {}
 
   static empty(): MaterialSide {
-    const m = new MaterialSide();
-    for (const role of ROLES) m[role] = 0;
-    return m;
+    const m = new MaterialSide()
+    for (const role of ROLES) m[role] = 0
+    return m
   }
 
   static fromBoard(board: Board, color: Color): MaterialSide {
-    const m = new MaterialSide();
-    for (const role of ROLES) m[role] = board.pieces(color, role).size();
-    return m;
+    const m = new MaterialSide()
+    for (const role of ROLES) m[role] = board.pieces(color, role).size()
+    return m
   }
 
   clone(): MaterialSide {
-    const m = new MaterialSide();
-    for (const role of ROLES) m[role] = this[role];
-    return m;
+    const m = new MaterialSide()
+    for (const role of ROLES) m[role] = this[role]
+    return m
   }
 
   equals(other: MaterialSide): boolean {
-    return ROLES.every(role => this[role] === other[role]);
+    return ROLES.every(role => this[role] === other[role])
   }
 
   add(other: MaterialSide): MaterialSide {
-    const m = new MaterialSide();
-    for (const role of ROLES) m[role] = this[role] + other[role];
-    return m;
+    const m = new MaterialSide()
+    for (const role of ROLES) m[role] = this[role] + other[role]
+    return m
   }
 
   nonEmpty(): boolean {
-    return ROLES.some(role => this[role] > 0);
+    return ROLES.some(role => this[role] > 0)
   }
 
   isEmpty(): boolean {
-    return !this.nonEmpty();
+    return !this.nonEmpty()
   }
 
   hasPawns(): boolean {
-    return this.pawn > 0;
+    return this.pawn > 0
   }
 
   hasNonPawns(): boolean {
-    return this.knight > 0 || this.bishop > 0 || this.rook > 0 || this.queen > 0 || this.king > 0;
+    return this.knight > 0 || this.bishop > 0 || this.rook > 0 || this.queen > 0 || this.king > 0
   }
 
   size(): number {
-    return this.pawn + this.knight + this.bishop + this.rook + this.queen + this.king;
+    return this.pawn + this.knight + this.bishop + this.rook + this.queen + this.king
   }
 }
 
@@ -65,47 +65,47 @@ export class Material implements ByColor<MaterialSide> {
   constructor(public white: MaterialSide, public black: MaterialSide) {}
 
   static empty(): Material {
-    return new Material(MaterialSide.empty(), MaterialSide.empty());
+    return new Material(MaterialSide.empty(), MaterialSide.empty())
   }
 
   static fromBoard(board: Board): Material {
-    return new Material(MaterialSide.fromBoard(board, 'white'), MaterialSide.fromBoard(board, 'black'));
+    return new Material(MaterialSide.fromBoard(board, 'white'), MaterialSide.fromBoard(board, 'black'))
   }
 
   clone(): Material {
-    return new Material(this.white.clone(), this.black.clone());
+    return new Material(this.white.clone(), this.black.clone())
   }
 
   equals(other: Material): boolean {
-    return this.white.equals(other.white) && this.black.equals(other.black);
+    return this.white.equals(other.white) && this.black.equals(other.black)
   }
 
   add(other: Material): Material {
-    return new Material(this.white.add(other.white), this.black.add(other.black));
+    return new Material(this.white.add(other.white), this.black.add(other.black))
   }
 
   count(role: Role): number {
-    return this.white[role] + this.black[role];
+    return this.white[role] + this.black[role]
   }
 
   size(): number {
-    return this.white.size() + this.black.size();
+    return this.white.size() + this.black.size()
   }
 
   isEmpty(): boolean {
-    return this.white.isEmpty() && this.black.isEmpty();
+    return this.white.isEmpty() && this.black.isEmpty()
   }
 
   nonEmpty(): boolean {
-    return !this.isEmpty();
+    return !this.isEmpty()
   }
 
   hasPawns(): boolean {
-    return this.white.hasPawns() || this.black.hasPawns();
+    return this.white.hasPawns() || this.black.hasPawns()
   }
 
   hasNonPawns(): boolean {
-    return this.white.hasNonPawns() || this.black.hasNonPawns();
+    return this.white.hasNonPawns() || this.black.hasNonPawns()
   }
 }
 
@@ -113,15 +113,15 @@ export class RemainingChecks implements ByColor<number> {
   constructor(public white: number, public black: number) {}
 
   static default(): RemainingChecks {
-    return new RemainingChecks(3, 3);
+    return new RemainingChecks(3, 3)
   }
 
   clone(): RemainingChecks {
-    return new RemainingChecks(this.white, this.black);
+    return new RemainingChecks(this.white, this.black)
   }
 
   equals(other: RemainingChecks): boolean {
-    return this.white === other.white && this.black === other.black;
+    return this.white === other.white && this.black === other.black
   }
 }
 
@@ -129,14 +129,14 @@ export class RemainingChecks implements ByColor<number> {
  * A not necessarily legal chess or chess variant position.
  */
 export interface Setup {
-  board: Board;
-  pockets: Material | undefined;
-  turn: Color;
-  castlingRights: SquareSet;
-  epSquare: Square | undefined;
-  remainingChecks: RemainingChecks | undefined;
-  halfmoves: number;
-  fullmoves: number;
+  board: Board
+  pockets: Material | undefined
+  turn: Color
+  castlingRights: SquareSet
+  epSquare: Square | undefined
+  remainingChecks: RemainingChecks | undefined
+  halfmoves: number
+  fullmoves: number
 }
 
 export const defaultSetup = (): Setup => ({
@@ -147,8 +147,8 @@ export const defaultSetup = (): Setup => ({
   epSquare: undefined,
   remainingChecks: undefined,
   halfmoves: 0,
-  fullmoves: 1,
-});
+  fullmoves: 1
+})
 
 export const setupClone = (setup: Setup): Setup => ({
   board: setup.board.clone(),
@@ -158,8 +158,8 @@ export const setupClone = (setup: Setup): Setup => ({
   epSquare: setup.epSquare,
   remainingChecks: setup.remainingChecks?.clone(),
   halfmoves: setup.halfmoves,
-  fullmoves: setup.fullmoves,
-});
+  fullmoves: setup.fullmoves
+})
 
 export const setupEquals = (left: Setup, right: Setup): boolean =>
   boardEquals(left.board, right.board) &&
@@ -170,4 +170,4 @@ export const setupEquals = (left: Setup, right: Setup): boolean =>
   ((right.remainingChecks && left.remainingChecks?.equals(right.remainingChecks)) ||
     (!left.remainingChecks && !right.remainingChecks)) &&
   left.halfmoves === right.halfmoves &&
-  left.fullmoves === right.fullmoves;
+  left.fullmoves === right.fullmoves

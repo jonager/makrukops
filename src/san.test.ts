@@ -1,78 +1,78 @@
-import { expect, test } from '@jest/globals';
-import { parseUci } from './util.js';
-import { makeSan, makeSanVariation, parseSan } from './san.js';
-import { Chess } from './chess.js';
-import { parseFen, makeFen } from './fen.js';
-import { Antichess, Crazyhouse } from './variant.js';
+import { expect, test } from '@jest/globals'
+import { parseUci } from './util.js'
+import { makeSan, makeSanVariation, parseSan } from './san.js'
+import { Chess } from './chess.js'
+import { parseFen, makeFen } from './fen.js'
+import { Antichess, Crazyhouse } from './variant.js'
 
 test('make variation with king move', () => {
-  const pos = Chess.default();
-  const variation = 'e2e4 e7e5 e1e2'.split(' ').map(uci => parseUci(uci)!);
-  expect(makeSanVariation(pos, variation)).toBe('1. e4 e5 2. Ke2');
-  expect(pos).toEqual(Chess.default());
-});
+  const pos = Chess.default()
+  const variation = 'e2e4 e7e5 e1e2'.split(' ').map(uci => parseUci(uci)!)
+  expect(makeSanVariation(pos, variation)).toBe('1. e4 e5 2. Ke2')
+  expect(pos).toEqual(Chess.default())
+})
 
 test('make crazyhouse variation', () => {
-  const setup = parseFen('r4b1N~/1ppk1P2/p1b5/6p1/8/1PBPPq2/P1PR1P2/1K4N1/PNBRPPPrqnn b - - 71 36').unwrap();
-  const pos = Crazyhouse.fromSetup(setup).unwrap();
-  const variation = 'N@a3 b1b2 R@b1'.split(' ').map(uci => parseUci(uci)!);
-  expect(makeSanVariation(pos, variation)).toBe('36... N@a3+ 37. Kb2 R@b1#');
-  expect(pos).toEqual(Crazyhouse.fromSetup(setup).unwrap());
-});
+  const setup = parseFen('r4b1N~/1ppk1P2/p1b5/6p1/8/1PBPPq2/P1PR1P2/1K4N1/PNBRPPPrqnn b - - 71 36').unwrap()
+  const pos = Crazyhouse.fromSetup(setup).unwrap()
+  const variation = 'N@a3 b1b2 R@b1'.split(' ').map(uci => parseUci(uci)!)
+  expect(makeSanVariation(pos, variation)).toBe('36... N@a3+ 37. Kb2 R@b1#')
+  expect(pos).toEqual(Crazyhouse.fromSetup(setup).unwrap())
+})
 
 test('make stockfish line with many knight moves', () => {
-  const setup = parseFen('2rq1rk1/pb1nbp1p/1pn3p1/3pP3/2pP4/1N3NPQ/PP3PBP/R1B1R1K1 w - - 0 16').unwrap();
-  const pos = Chess.fromSetup(setup).unwrap();
+  const setup = parseFen('2rq1rk1/pb1nbp1p/1pn3p1/3pP3/2pP4/1N3NPQ/PP3PBP/R1B1R1K1 w - - 0 16').unwrap()
+  const pos = Chess.fromSetup(setup).unwrap()
   const variation =
     'b3d2 c6b4 e1d1 f8e8 d2f1 b4d3 f3e1 d3e1 d1e1 d7f8 f2f4 f8e6 c1e3 h7h5 f4f5 e6g5 e3g5 e7g5 f5f6 d8c7'
       .split(' ')
-      .map(uci => parseUci(uci)!);
+      .map(uci => parseUci(uci)!)
   expect(makeSanVariation(pos, variation)).toBe(
     '16. Nbd2 Nb4 17. Rd1 Re8 18. Nf1 Nd3 19. Ne1 Nxe1 20. Rxe1 Nf8 21. f4 Ne6 22. Be3 h5 23. f5 Ng5 24. Bxg5 Bxg5 25. f6 Qc7'
-  );
-  expect(pos).toEqual(Chess.fromSetup(setup).unwrap());
-});
+  )
+  expect(pos).toEqual(Chess.fromSetup(setup).unwrap())
+})
 
 test('make en passant', () => {
-  const setup = parseFen('6bk/7b/8/3pP3/8/8/8/Q3K3 w - d6 0 2').unwrap();
-  const pos = Chess.fromSetup(setup).unwrap();
-  const move = parseUci('e5d6')!;
-  expect(makeSan(pos, move)).toBe('exd6#');
-});
+  const setup = parseFen('6bk/7b/8/3pP3/8/8/8/Q3K3 w - d6 0 2').unwrap()
+  const pos = Chess.fromSetup(setup).unwrap()
+  const move = parseUci('e5d6')!
+  expect(makeSan(pos, move)).toBe('exd6#')
+})
 
 test('parse basic san', () => {
-  const pos = Chess.default();
-  expect(parseSan(pos, 'e4')).toEqual(parseUci('e2e4'));
-  expect(parseSan(pos, 'Nf3')).toEqual(parseUci('g1f3'));
-  expect(parseSan(pos, 'Nf6')).toBeUndefined();
-  expect(parseSan(pos, 'Ke2')).toBeUndefined();
-  expect(parseSan(pos, 'O-O')).toBeUndefined();
-  expect(parseSan(pos, 'O-O-O')).toBeUndefined();
-  expect(parseSan(pos, 'Q@e3')).toBeUndefined();
-});
+  const pos = Chess.default()
+  expect(parseSan(pos, 'e4')).toEqual(parseUci('e2e4'))
+  expect(parseSan(pos, 'Nf3')).toEqual(parseUci('g1f3'))
+  expect(parseSan(pos, 'Nf6')).toBeUndefined()
+  expect(parseSan(pos, 'Ke2')).toBeUndefined()
+  expect(parseSan(pos, 'O-O')).toBeUndefined()
+  expect(parseSan(pos, 'O-O-O')).toBeUndefined()
+  expect(parseSan(pos, 'Q@e3')).toBeUndefined()
+})
 
 test('parse fools mate', () => {
-  const pos = Chess.default();
-  const line = ['e4', 'e5', 'Qh5', 'Nf6', 'Bc4', 'Nc6', 'Qxf7#'];
-  for (const san of line) pos.play(parseSan(pos, san)!);
-  expect(pos.isCheckmate()).toBe(true);
-});
+  const pos = Chess.default()
+  const line = ['e4', 'e5', 'Qh5', 'Nf6', 'Bc4', 'Nc6', 'Qxf7#']
+  for (const san of line) pos.play(parseSan(pos, san)!)
+  expect(pos.isCheckmate()).toBe(true)
+})
 
 test('parse pawn capture', () => {
-  let pos = Chess.default();
-  const line = ['e4', 'd5', 'c4', 'Nf6', 'exd5'];
-  for (const san of line) pos.play(parseSan(pos, san)!);
-  expect(makeFen(pos.toSetup())).toBe('rnbqkb1r/ppp1pppp/5n2/3P4/2P5/8/PP1P1PPP/RNBQKBNR b KQkq - 0 3');
+  let pos = Chess.default()
+  const line = ['e4', 'd5', 'c4', 'Nf6', 'exd5']
+  for (const san of line) pos.play(parseSan(pos, san)!)
+  expect(makeFen(pos.toSetup())).toBe('rnbqkb1r/ppp1pppp/5n2/3P4/2P5/8/PP1P1PPP/RNBQKBNR b KQkq - 0 3')
 
-  pos = Chess.fromSetup(parseFen('r4br1/pp1Npkp1/2P4p/5P2/6P1/5KnP/PP6/R1B5 b - -').unwrap()).unwrap();
-  expect(parseSan(pos, 'bxc6')).toEqual({ from: 49, to: 42 });
+  pos = Chess.fromSetup(parseFen('r4br1/pp1Npkp1/2P4p/5P2/6P1/5KnP/PP6/R1B5 b - -').unwrap()).unwrap()
+  expect(parseSan(pos, 'bxc6')).toEqual({ from: 49, to: 42 })
 
-  pos = Chess.fromSetup(parseFen('2rq1rk1/pb2bppp/1p2p3/n1ppPn2/2PP4/PP3N2/1B1NQPPP/RB3RK1 b - -').unwrap()).unwrap();
-  expect(parseSan(pos, 'c4')).toBeUndefined(); // missing file
-});
+  pos = Chess.fromSetup(parseFen('2rq1rk1/pb2bppp/1p2p3/n1ppPn2/2PP4/PP3N2/1B1NQPPP/RB3RK1 b - -').unwrap()).unwrap()
+  expect(parseSan(pos, 'c4')).toBeUndefined() // missing file
+})
 
 test('parse antichess', () => {
-  const pos = Antichess.default();
+  const pos = Antichess.default()
   const line = [
     'g3',
     'Nh6',
@@ -135,14 +135,14 @@ test('parse antichess', () => {
     'Bf3',
     'Bxf3',
     'Kg2',
-    'Bxg2#',
-  ];
-  for (const san of line) pos.play(parseSan(pos, san)!);
-  expect(makeFen(pos.toSetup())).toBe('8/2k5/8/8/8/8/6b1/8 w - - 0 32');
-});
+    'Bxg2#'
+  ]
+  for (const san of line) pos.play(parseSan(pos, san)!)
+  expect(makeFen(pos.toSetup())).toBe('8/2k5/8/8/8/8/6b1/8 w - - 0 32')
+})
 
 test('parse crazyhouse', () => {
-  const pos = Crazyhouse.default();
+  const pos = Crazyhouse.default()
   const line = [
     'd4',
     'd5',
@@ -191,13 +191,13 @@ test('parse crazyhouse', () => {
     'Ke1',
     'Bxf4',
     'gxf4',
-    'Qdd1#',
-  ];
-  for (const san of line) pos.play(parseSan(pos, san)!);
-  expect(makeFen(pos.toSetup())).toBe('r4rk1/ppp1nppp/6b1/8/2B1pP2/4Pq2/PPP4P/R1BqK3[PPNNNBRp] w - - 1 25');
-});
+    'Qdd1#'
+  ]
+  for (const san of line) pos.play(parseSan(pos, san)!)
+  expect(makeFen(pos.toSetup())).toBe('r4rk1/ppp1nppp/6b1/8/2B1pP2/4Pq2/PPP4P/R1BqK3[PPNNNBRp] w - - 1 25')
+})
 
 test('overspecified pawn move', () => {
-  const pos = Chess.default();
-  expect(parseSan(pos, '2e4')).toEqual({ from: 12, to: 28 });
-});
+  const pos = Chess.default()
+  expect(parseSan(pos, '2e4')).toEqual({ from: 12, to: 28 })
+})
