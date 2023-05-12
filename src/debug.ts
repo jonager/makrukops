@@ -3,7 +3,7 @@ import { opposite, squareRank, makeSquare, makeUci } from './util.js'
 import { makePiece } from './fen.js'
 import { SquareSet } from './squareSet.js'
 import { Board } from './board.js'
-import { Position } from './chess.js'
+import { Position } from './makruk.js'
 
 export const squareSet = (squares: SquareSet): string => {
   const r = []
@@ -46,8 +46,7 @@ export const dests = (dests: Map<Square, SquareSet>): string => {
 export const perft = (pos: Position, depth: number, log = false): number => {
   if (depth < 1) return 1
 
-  const promotionRoles: Role[] = ['queen', 'knight', 'rook', 'bishop']
-  if (pos.rules === 'antichess') promotionRoles.push('king')
+  const promotionRoles: Role[] = ['promotedpawn']
 
   const ctx = pos.ctx()
   const dropDests = pos.dropDests(ctx)

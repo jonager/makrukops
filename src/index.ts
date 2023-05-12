@@ -58,7 +58,7 @@ export { Board } from './board.js'
 
 export { Material, MaterialSide, RemainingChecks, Setup, defaultSetup } from './setup.js'
 
-export { IllegalSetup, Castles, Chess, Position, PositionError, Context } from './chess.js'
+export { IllegalSetup, Makruk, Position, PositionError, Context } from './makruk.js'
 
 export * as compat from './compat.js'
 

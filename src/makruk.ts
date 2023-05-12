@@ -50,101 +50,6 @@ const attacksTo = (square: Square, attacker: Color, board: Board, occupied: Squa
       .union(pawnAttacks(opposite(attacker), square).intersect(board.pawn))
   )
 
-export class Castles {
-  castlingRights: SquareSet
-  rook: ByColor<ByCastlingSide<Square | undefined>>
-  path: ByColor<ByCastlingSide<SquareSet>>
-
-  private constructor() {}
-
-  static default(): Castles {
-    const castles = new Castles()
-    castles.castlingRights = SquareSet.corners()
-    castles.rook = {
-      white: { a: 0, h: 7 },
-      black: { a: 56, h: 63 }
-    }
-    castles.path = {
-      white: { a: new SquareSet(0xe, 0), h: new SquareSet(0x60, 0) },
-      black: { a: new SquareSet(0, 0x0e000000), h: new SquareSet(0, 0x60000000) }
-    }
-    return castles
-  }
-
-  static empty(): Castles {
-    const castles = new Castles()
-    castles.castlingRights = SquareSet.empty()
-    castles.rook = {
-      white: { a: undefined, h: undefined },
-      black: { a: undefined, h: undefined }
-    }
-    castles.path = {
-      white: { a: SquareSet.empty(), h: SquareSet.empty() },
-      black: { a: SquareSet.empty(), h: SquareSet.empty() }
-    }
-    return castles
-  }
-
-  clone(): Castles {
-    const castles = new Castles()
-    castles.castlingRights = this.castlingRights
-    castles.rook = {
-      white: { a: this.rook.white.a, h: this.rook.white.h },
-      black: { a: this.rook.black.a, h: this.rook.black.h }
-    }
-    castles.path = {
-      white: { a: this.path.white.a, h: this.path.white.h },
-      black: { a: this.path.black.a, h: this.path.black.h }
-    }
-    return castles
-  }
-
-  private add(color: Color, side: CastlingSide, king: Square, rook: Square): void {
-    const kingTo = kingCastlesTo(color, side)
-    const rookTo = rookCastlesTo(color, side)
-    this.castlingRights = this.castlingRights.with(rook)
-    this.rook[color][side] = rook
-    this.path[color][side] = between(rook, rookTo)
-      .with(rookTo)
-      .union(between(king, kingTo).with(kingTo))
-      .without(king)
-      .without(rook)
-  }
-
-  static fromSetup(setup: Setup): Castles {
-    const castles = Castles.empty()
-    const rooks = setup.castlingRights.intersect(setup.board.rook)
-    for (const color of COLORS) {
-      const backrank = SquareSet.backrank(color)
-      const king = setup.board.kingOf(color)
-      if (!defined(king) || !backrank.has(king)) continue
-      const side = rooks.intersect(setup.board[color]).intersect(backrank)
-      const aSide = side.first()
-      if (defined(aSide) && aSide < king) castles.add(color, 'a', king, aSide)
-      const hSide = side.last()
-      if (defined(hSide) && king < hSide) castles.add(color, 'h', king, hSide)
-    }
-    return castles
-  }
-
-  discardRook(square: Square): void {
-    if (this.castlingRights.has(square)) {
-      this.castlingRights = this.castlingRights.without(square)
-      for (const color of COLORS) {
-        for (const side of CASTLING_SIDES) {
-          if (this.rook[color][side] === square) this.rook[color][side] = undefined
-        }
-      }
-    }
-  }
-
-  discardColor(color: Color): void {
-    this.castlingRights = this.castlingRights.diff(SquareSet.backrank(color))
-    this.rook[color].a = undefined
-    this.rook[color].h = undefined
-  }
-}
-
 export interface Context {
   king: Square | undefined
   blockers: SquareSet
@@ -157,7 +62,6 @@ export abstract class Position {
   board: Board
   pockets: Material | undefined
   turn: Color
-  castles: Castles
   epSquare: Square | undefined
   remainingChecks: RemainingChecks | undefined
   halfmoves: number
@@ -169,7 +73,6 @@ export abstract class Position {
     this.board = Board.default()
     this.pockets = undefined
     this.turn = 'white'
-    this.castles = Castles.default()
     this.epSquare = undefined
     this.remainingChecks = undefined
     this.halfmoves = 0
@@ -181,7 +84,6 @@ export abstract class Position {
     this.board.promoted = SquareSet.empty()
     this.pockets = undefined
     this.turn = setup.turn
-    this.castles = Castles.fromSetup(setup)
     this.epSquare = validEpSquare(this, setup.epSquare)
     this.remainingChecks = undefined
     this.halfmoves = setup.halfmoves
@@ -206,7 +108,6 @@ export abstract class Position {
 
   protected playCaptureAt(square: Square, captured: Piece): void {
     this.halfmoves = 0
-    if (captured.role === 'rook') this.castles.discardRook(square)
     if (this.pockets) this.pockets[opposite(captured.color)][captured.promoted ? 'pawn' : captured.role]++
   }
 
@@ -239,7 +140,6 @@ export abstract class Position {
     pos.board = this.board.clone()
     pos.pockets = this.pockets?.clone()
     pos.turn = this.turn
-    pos.castles = this.castles.clone()
     pos.epSquare = this.epSquare
     pos.remainingChecks = this.remainingChecks?.clone()
     pos.halfmoves = this.halfmoves
@@ -298,23 +198,24 @@ export abstract class Position {
 
     pseudo = pseudo.diff(this.board[this.turn])
 
-    if (defined(ctx.king)) {
-      if (piece.role === 'king') {
-        const occ = this.board.occupied.without(square)
-        for (const to of pseudo) {
-          if (this.kingAttackers(to, opposite(this.turn), occ).nonEmpty()) pseudo = pseudo.without(to)
-        }
-        return pseudo.union(castlingDest(this, 'a', ctx)).union(castlingDest(this, 'h', ctx))
-      }
+    // todo: check this
+    // if (defined(ctx.king)) {
+    //   if (piece.role === 'king') {
+    //     const occ = this.board.occupied.without(square)
+    //     for (const to of pseudo) {
+    //       if (this.kingAttackers(to, opposite(this.turn), occ).nonEmpty()) pseudo = pseudo.without(to)
+    //     }
+    //     return pseudo.union(castlingDest(this, 'a', ctx)).union(castlingDest(this, 'h', ctx))
+    //   }
 
-      if (ctx.checkers.nonEmpty()) {
-        const checker = ctx.checkers.singleSquare()
-        if (!defined(checker)) return SquareSet.empty()
-        pseudo = pseudo.intersect(between(checker, ctx.king).with(checker))
-      }
+    //   if (ctx.checkers.nonEmpty()) {
+    //     const checker = ctx.checkers.singleSquare()
+    //     if (!defined(checker)) return SquareSet.empty()
+    //     pseudo = pseudo.intersect(between(checker, ctx.king).with(checker))
+    //   }
 
-      if (ctx.blockers.has(square)) pseudo = pseudo.intersect(ray(square, ctx.king))
-    }
+    //   if (ctx.blockers.has(square)) pseudo = pseudo.intersect(ray(square, ctx.king))
+    // }
 
     if (legal) pseudo = pseudo.union(legal)
     return pseudo
@@ -352,7 +253,6 @@ export abstract class Position {
       board: this.board.clone(),
       pockets: this.pockets?.clone(),
       turn: this.turn,
-      castlingRights: this.castles.castlingRights,
       epSquare: legalEpSquare(this),
       remainingChecks: this.remainingChecks?.clone(),
       halfmoves: Math.min(this.halfmoves, 150),
@@ -379,7 +279,6 @@ export abstract class Position {
       return this.dropDests(ctx).has(move.to)
     } else {
       if (move.promotion === 'pawn') return false
-      if (move.promotion === 'king' && this.rules !== 'antichess') return false
       if (!!move.promotion !== (this.board.pawn.has(move.from) && SquareSet.backranks().has(move.to))) return false
       const dests = this.dests(move.from, ctx)
       return dests.has(move.to) || dests.has(normalizeMove(this, move).to)
@@ -428,7 +327,6 @@ export abstract class Position {
   play(move: Move): void {
     const turn = this.turn
     const epSquare = this.epSquare
-    const castling = castlingSide(this, move)
 
     this.epSquare = undefined
     this.halfmoves += 1
@@ -457,24 +355,10 @@ export abstract class Position {
           piece.role = move.promotion
           piece.promoted = !!this.pockets
         }
-      } else if (piece.role === 'rook') {
-        this.castles.discardRook(move.from)
-      } else if (piece.role === 'king') {
-        if (castling) {
-          const rookFrom = this.castles.rook[turn][castling]
-          if (defined(rookFrom)) {
-            const rook = this.board.take(rookFrom)
-            this.board.set(kingCastlesTo(turn, castling), piece)
-            if (rook) this.board.set(rookCastlesTo(turn, castling), rook)
-          }
-        }
-        this.castles.discardColor(turn)
       }
 
-      if (!castling) {
-        const capture = this.board.set(move.to, piece) || epCapture
-        if (capture) this.playCaptureAt(move.to, capture)
-      }
+      const capture = this.board.set(move.to, piece) || epCapture
+      if (capture) this.playCaptureAt(move.to, capture)
     }
 
     if (this.remainingChecks) {
@@ -483,25 +367,25 @@ export abstract class Position {
   }
 }
 
-export class Chess extends Position {
+export class Makruk extends Position {
   private constructor() {
-    super('chess')
+    super('makruk')
   }
 
-  static default(): Chess {
+  static default(): Makruk {
     const pos = new this()
     pos.reset()
     return pos
   }
 
-  static fromSetup(setup: Setup): Result<Chess, PositionError> {
+  static fromSetup(setup: Setup): Result<Makruk, PositionError> {
     const pos = new this()
     pos.setupUnchecked(setup)
     return pos.validate().map(_ => pos)
   }
 
-  clone(): Chess {
-    return super.clone() as Chess
+  clone(): Makruk {
+    return super.clone() as Makruk
   }
 }
 
@@ -543,26 +427,6 @@ const canCaptureEp = (pos: Position, pawnFrom: Square, ctx: Context): boolean =>
     .isEmpty()
 }
 
-const castlingDest = (pos: Position, side: CastlingSide, ctx: Context): SquareSet => {
-  if (!defined(ctx.king) || ctx.checkers.nonEmpty()) return SquareSet.empty()
-  const rook = pos.castles.rook[pos.turn][side]
-  if (!defined(rook)) return SquareSet.empty()
-  if (pos.castles.path[pos.turn][side].intersects(pos.board.occupied)) return SquareSet.empty()
-
-  const kingTo = kingCastlesTo(pos.turn, side)
-  const kingPath = between(ctx.king, kingTo)
-  const occ = pos.board.occupied.without(ctx.king)
-  for (const sq of kingPath) {
-    if (pos.kingAttackers(sq, opposite(pos.turn), occ).nonEmpty()) return SquareSet.empty()
-  }
-
-  const rookTo = rookCastlesTo(pos.turn, side)
-  const after = pos.board.occupied.toggle(ctx.king).toggle(rook).toggle(rookTo)
-  if (pos.kingAttackers(kingTo, opposite(pos.turn), after).nonEmpty()) return SquareSet.empty()
-
-  return SquareSet.fromSquare(rook)
-}
-
 export const pseudoDests = (pos: Position, square: Square, ctx: Context): SquareSet => {
   if (ctx.variantEnd) return SquareSet.empty()
   const piece = pos.board.get(square)
@@ -587,8 +451,10 @@ export const pseudoDests = (pos: Position, square: Square, ctx: Context): Square
   } else {
     pseudo = pseudo.diff(pos.board[pos.turn])
   }
-  if (square === ctx.king) return pseudo.union(castlingDest(pos, 'a', ctx)).union(castlingDest(pos, 'h', ctx))
-  else return pseudo
+  // todo: check this
+  // if (square === ctx.king) return pseudo.union(castlingDest(pos, 'a', ctx)).union(castlingDest(pos, 'h', ctx))
+  // else return pseudo
+  return pseudo
 }
 
 export const equalsIgnoreMoves = (left: Position, right: Position): boolean =>
@@ -596,27 +462,13 @@ export const equalsIgnoreMoves = (left: Position, right: Position): boolean =>
   boardEquals(left.board, right.board) &&
   ((right.pockets && left.pockets?.equals(right.pockets)) || (!left.pockets && !right.pockets)) &&
   left.turn === right.turn &&
-  left.castles.castlingRights.equals(right.castles.castlingRights) &&
   legalEpSquare(left) === legalEpSquare(right) &&
   ((right.remainingChecks && left.remainingChecks?.equals(right.remainingChecks)) ||
     (!left.remainingChecks && !right.remainingChecks))
 
-export const castlingSide = (pos: Position, move: Move): CastlingSide | undefined => {
-  if (isDrop(move)) return
-  const delta = move.to - move.from
-  if (Math.abs(delta) !== 2 && !pos.board[pos.turn].has(move.to)) return
-  if (!pos.board.king.has(move.from)) return
-  return delta > 0 ? 'h' : 'a'
-}
-
 export const normalizeMove = (pos: Position, move: Move): Move => {
-  const side = castlingSide(pos, move)
-  if (!side) return move
-  const rookFrom = pos.castles.rook[pos.turn][side]
-  return {
-    from: (move as NormalMove).from,
-    to: defined(rookFrom) ? rookFrom : move.to
-  }
+  // leave like this for now, not needed anymore
+  return move
 }
 
 export const isStandardMaterialSide = (board: Board, color: Color): boolean => {
@@ -629,7 +481,7 @@ export const isStandardMaterialSide = (board: Board, color: Color): boolean => {
   return board.pieces(color, 'pawn').size() + promoted <= 8
 }
 
-export const isStandardMaterial = (pos: Chess): boolean =>
+export const isStandardMaterial = (pos: Makruk): boolean =>
   COLORS.every(color => isStandardMaterialSide(pos.board, color))
 
 export const isImpossibleCheck = (pos: Position): boolean => {
@@ -649,10 +501,6 @@ export const isImpossibleCheck = (pos: Position): boolean => {
           .kingAttackers(ourKing, opposite(pos.turn), pos.board.occupied.without(pushedTo).with(pushedFrom))
           .nonEmpty())
     )
-  } else if (pos.rules === 'atomic') {
-    // Other king moving away can cause many checks to be given at the same
-    // time. Not checking details, or even that the king is close enough.
-    return false
   } else {
     // Sliding checkers aligned with king.
     return checkers.size() > 2 || (checkers.size() === 2 && ray(checkers.first()!, checkers.last()!).has(ourKing))

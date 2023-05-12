@@ -1,6 +1,5 @@
 import { expect, test } from '@jest/globals'
 import { parseFen, makeFen, makeBoardFen, INITIAL_FEN, INITIAL_BOARD_FEN, EMPTY_BOARD_FEN } from './fen.js'
-import { SquareSet } from './squareSet.js'
 import { Board } from './board.js'
 import { defaultSetup } from './setup.js'
 
@@ -18,7 +17,6 @@ test('parse initial fen', () => {
   expect(setup.board).toEqual(Board.default())
   expect(setup.pockets).toBeUndefined()
   expect(setup.turn).toEqual('white')
-  expect(setup.castlingRights).toEqual(SquareSet.corners())
   expect(setup.epSquare).toBeUndefined()
   expect(setup.remainingChecks).toBeUndefined()
   expect(setup.halfmoves).toEqual(0)
@@ -30,7 +28,6 @@ test('partial fen', () => {
   expect(setup.board).toEqual(Board.default())
   expect(setup.pockets).toBeUndefined()
   expect(setup.turn).toEqual('white')
-  expect(setup.castlingRights).toEqual(SquareSet.empty())
   expect(setup.epSquare).toBeUndefined()
   expect(setup.remainingChecks).toBeUndefined()
   expect(setup.halfmoves).toEqual(0)

@@ -1,7 +1,7 @@
 {
   "name": "chessops",
   "version": "0.12.7",
-  "description": "Chess and chess variant rules and operations",
+  "description": "Makruk and makruk variant rules and operations",
   "keywords": [
     "chess",
     "lichess",
@@ -10,9 +10,9 @@
     "uci",
     "typescript"
   ],
-  "repository": "github:niklasf/chessops",
-  "author": "Niklas Fiekas <niklas.fiekas@backscattering.de>",
-  "funding": "https://github.com/sponsors/niklasf",
+  "repository": "github:thaichess-org/makrukops",
+  "author": "Niklas Fiekas <niklas.fiekas@backscattering.de> && jonager <https://github.com/jonager>",
+  "funding": "https://thaichess.org/patron",
   "license": "GPL-3.0-or-later",
   "module": "index.js",
   "types": "index.d.ts",

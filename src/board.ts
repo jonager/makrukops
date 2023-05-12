@@ -18,12 +18,13 @@ export class Board implements Iterable<[Square, Piece]>, ByRole<SquareSet>, ByCo
    * All squares occupied by pieces known to be promoted. This information is
    * relevant in chess variants like Crazyhouse.
    */
-  promoted: SquareSet
+  promoted: SquareSet // todo: verify if needed for makruk
 
   white: SquareSet
   black: SquareSet
 
   pawn: SquareSet
+  promotedpawn: SquareSet
   knight: SquareSet
   bishop: SquareSet
   rook: SquareSet
@@ -39,7 +40,7 @@ export class Board implements Iterable<[Square, Piece]>, ByRole<SquareSet>, ByCo
   }
 
   /**
-   * Resets all pieces to the default starting position for standard chess.
+   * Resets all pieces to the default starting position for standard makruk.
    */
   reset(): void {
     this.occupied = new SquareSet(0xffff, 0xffff_0000)

@@ -291,7 +291,6 @@ export const makeFen = (setup: Setup, opts?: FenOpts): string =>
   [
     makeBoardFen(setup.board) + (setup.pockets ? `[${makePockets(setup.pockets)}]` : ''),
     setup.turn[0],
-    makeCastlingFen(setup.board, setup.castlingRights),
     defined(setup.epSquare) ? makeSquare(setup.epSquare) : '-',
     ...(setup.remainingChecks ? [makeRemainingChecks(setup.remainingChecks)] : []),
     ...(opts?.epd ? [] : [Math.max(0, Math.min(setup.halfmoves, 9999)), Math.max(1, Math.min(setup.fullmoves, 9999))])

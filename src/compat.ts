@@ -1,8 +1,8 @@
 /**
  * Compatibility with other libraries.
  *
- * Convert between the formats used by chessops,
- * [chessground](https://github.com/lichess-org/chessground),
+ * Convert between the formats used by makrukops,
+ * [makrukground](https://github.com/thaichess-org/makrukground),
  * and [scalachess](https://github.com/lichess-org/scalachess).
  *
  * @packageDocumentation
@@ -10,26 +10,27 @@
 
 import { Rules, SquareName, Move, isDrop } from './types.js'
 import { makeSquare, squareFile } from './util.js'
-import { Position } from './chess.js'
+import { Position } from './makruk.js'
 
-export interface ChessgroundDestsOpts {
+export interface MakrukgroundDestsOpts {
   chess960?: boolean
 }
 
 /**
- * Computes the legal move destinations in the format used by chessground.
+ * Computes the legal move destinations in the format used by makrukground.
  *
  * Includes both possible representations of castling moves (unless
  * `chess960` mode is enabled), so that the `rookCastles` option will work
  * correctly.
  */
-export const chessgroundDests = (pos: Position, opts?: ChessgroundDestsOpts): Map<SquareName, SquareName[]> => {
+export const makrukgroundDests = (pos: Position, opts?: MakrukgroundDestsOpts): Map<SquareName, SquareName[]> => {
   const result = new Map()
   const ctx = pos.ctx()
   for (const [from, squares] of pos.allDests(ctx)) {
     if (squares.nonEmpty()) {
       const d = Array.from(squares, makeSquare)
       if (!opts?.chess960 && from === ctx.king && squareFile(from) === 4) {
+        // todo: check this logic, since we don't castle in makruk
         // Chessground needs both types of castling dests and filters based on
         // a rookCastles setting.
         if (squares.has(0)) d.push('c1')
@@ -43,7 +44,7 @@ export const chessgroundDests = (pos: Position, opts?: ChessgroundDestsOpts): Ma
   return result
 }
 
-export const chessgroundMove = (move: Move): SquareName[] =>
+export const makrukgroundMove = (move: Move): SquareName[] =>
   isDrop(move) ? [makeSquare(move.to)] : [makeSquare(move.from), makeSquare(move.to)]
 
 export const scalachessCharPair = (move: Move): string =>
@@ -59,47 +60,19 @@ export const scalachessCharPair = (move: Move): string =>
           : 35 + move.to
       )
 
-export const lichessRules = (
-  variant:
-    | 'standard'
-    | 'chess960'
-    | 'antichess'
-    | 'fromPosition'
-    | 'kingOfTheHill'
-    | 'threeCheck'
-    | 'atomic'
-    | 'horde'
-    | 'racingKings'
-    | 'crazyhouse'
-): Rules => {
+export const thaichessRules = (variant: 'makruk'): Rules => {
   switch (variant) {
-    case 'standard':
-    case 'chess960':
-    case 'fromPosition':
-      return 'chess'
-    case 'threeCheck':
-      return '3check'
-    case 'kingOfTheHill':
-      return 'kingofthehill'
-    case 'racingKings':
-      return 'racingkings'
+    case 'makruk':
+      return 'makruk'
     default:
       return variant
   }
 }
 
-export const lichessVariant = (
-  rules: Rules
-): 'standard' | 'antichess' | 'kingOfTheHill' | 'threeCheck' | 'atomic' | 'horde' | 'racingKings' | 'crazyhouse' => {
+export const thaichessVariant = (rules: Rules): 'makruk' => {
   switch (rules) {
-    case 'chess':
-      return 'standard'
-    case '3check':
-      return 'threeCheck'
-    case 'kingofthehill':
-      return 'kingOfTheHill'
-    case 'racingkings':
-      return 'racingKings'
+    case 'makruk':
+      return 'makruk'
     default:
       return rules
   }

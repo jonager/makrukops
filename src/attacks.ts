@@ -1,7 +1,7 @@
 /**
  * Compute attacks and rays.
  *
- * These are low-level functions that can be used to implement chess rules.
+ * These are low-level functions that can be used to implement makruk rules.
  *
  * Implementation notes: Sliding attacks are computed using
  * [Hyperbola Quintessence](https://www.chessprogramming.org/Hyperbola_Quintessence).
@@ -122,6 +122,8 @@ export const attacks = (piece: Piece, square: Square, occupied: SquareSet): Squa
   switch (piece.role) {
     case 'pawn':
       return pawnAttacks(piece.color, square)
+    case 'promotedpawn':
+      return bishopAttacks(square, occupied)
     case 'knight':
       return knightAttacks(square)
     case 'bishop':

@@ -4,6 +4,7 @@ import { Board, boardEquals } from './board.js'
 
 export class MaterialSide implements ByRole<number> {
   pawn: number
+  promotedpawn: number
   knight: number
   bishop: number
   rook: number
@@ -132,7 +133,6 @@ export interface Setup {
   board: Board
   pockets: Material | undefined
   turn: Color
-  castlingRights: SquareSet
   epSquare: Square | undefined
   remainingChecks: RemainingChecks | undefined
   halfmoves: number
@@ -143,7 +143,6 @@ export const defaultSetup = (): Setup => ({
   board: Board.default(),
   pockets: undefined,
   turn: 'white',
-  castlingRights: SquareSet.corners(),
   epSquare: undefined,
   remainingChecks: undefined,
   halfmoves: 0,
@@ -154,7 +153,6 @@ export const setupClone = (setup: Setup): Setup => ({
   board: setup.board.clone(),
   pockets: setup.pockets?.clone(),
   turn: setup.turn,
-  castlingRights: setup.castlingRights,
   epSquare: setup.epSquare,
   remainingChecks: setup.remainingChecks?.clone(),
   halfmoves: setup.halfmoves,
@@ -165,7 +163,6 @@ export const setupEquals = (left: Setup, right: Setup): boolean =>
   boardEquals(left.board, right.board) &&
   ((right.pockets && left.pockets?.equals(right.pockets)) || (!left.pockets && !right.pockets)) &&
   left.turn === right.turn &&
-  left.castlingRights.equals(right.castlingRights) &&
   left.epSquare === right.epSquare &&
   ((right.remainingChecks && left.remainingChecks?.equals(right.remainingChecks)) ||
     (!left.remainingChecks && !right.remainingChecks)) &&

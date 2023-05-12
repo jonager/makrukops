@@ -1,7 +1,7 @@
 import { FILE_NAMES, RANK_NAMES, isDrop, Move, CastlingSide, SquareName } from './types.js'
 import { charToRole, defined, roleToChar, parseSquare, makeSquare, squareFile, squareRank, opposite } from './util.js'
 import { SquareSet } from './squareSet.js'
-import { Position } from './chess.js'
+import { Position } from './makruk.js'
 import { attacks, kingAttacks, queenAttacks, rookAttacks, bishopAttacks, knightAttacks } from './attacks.js'
 
 const makeSanWithoutSuffix = (pos: Position, move: Move): string => {
@@ -93,37 +93,12 @@ export const parseSan = (pos: Position, san: string): Move | undefined => {
         'n' | 'b' | 'r' | 'q' | 'k' | 'N' | 'B' | 'R' | 'Q' | 'K' | undefined
       ]
     | null
-  if (!match) {
-    // Castling
-    let castlingSide: CastlingSide | undefined
-    if (san === 'O-O' || san === 'O-O+' || san === 'O-O#') castlingSide = 'h'
-    else if (san === 'O-O-O' || san === 'O-O-O+' || san === 'O-O-O#') castlingSide = 'a'
-    if (castlingSide) {
-      const rook = pos.castles.rook[pos.turn][castlingSide]
-      if (!defined(ctx.king) || !defined(rook) || !pos.dests(ctx.king, ctx).has(rook)) return
-      return {
-        from: ctx.king,
-        to: rook
-      }
-    }
-
-    // Drop
-    const match = san.match(/^([pnbrqkPNBRQK])?@([a-h][1-8])[+#]?$/) as
-      | [string, 'p' | 'n' | 'b' | 'r' | 'q' | 'k' | 'P' | 'N' | 'B' | 'R' | 'Q' | 'K' | undefined, SquareName]
-      | null
-    if (!match) return
-    const move = {
-      role: match[1] ? charToRole(match[1]) : 'pawn',
-      to: parseSquare(match[2])
-    }
-    return pos.isLegal(move, ctx) ? move : undefined
-  }
+  if (!match) return
   const role = match[1] ? charToRole(match[1]) : 'pawn'
   const to = parseSquare(match[4])
 
   const promotion = match[5] ? charToRole(match[5]) : undefined
   if (!!promotion !== (role === 'pawn' && SquareSet.backranks().has(to))) return
-  if (promotion === 'king' && pos.rules !== 'antichess') return
 
   let candidates = pos.board.pieces(pos.turn, role)
   if (role === 'pawn' && !match[2]) candidates = candidates.intersect(SquareSet.fromFile(squareFile(to)))

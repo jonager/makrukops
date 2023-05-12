@@ -26,14 +26,16 @@ export const roleToChar = (role: Role): string => {
   switch (role) {
     case 'pawn':
       return 'p'
+    case 'promotedpawn':
+      return 'M'
     case 'knight':
       return 'n'
     case 'bishop':
-      return 'b'
+      return 's'
     case 'rook':
       return 'r'
     case 'queen':
-      return 'q'
+      return 'm'
     case 'king':
       return 'k'
   }

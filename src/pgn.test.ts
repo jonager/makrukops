@@ -16,7 +16,7 @@ import {
   isChildNode
 } from './pgn.js'
 import { parseSan } from './san.js'
-import { Position } from './chess.js'
+import { Position } from './makruk.js'
 import { makeFen } from './fen.js'
 import { createReadStream } from 'fs'
 

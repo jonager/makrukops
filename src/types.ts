@@ -26,7 +26,7 @@ export type ByColor<T> = {
   [color in Color]: T
 }
 
-export const ROLES = ['pawn', 'knight', 'bishop', 'rook', 'queen', 'king'] as const
+export const ROLES = ['pawn', 'promotedpawn', 'knight', 'bishop', 'rook', 'queen', 'king'] as const
 
 export type Role = (typeof ROLES)[number]
 
@@ -71,16 +71,7 @@ export const isDrop = (v: Move): v is DropMove => 'role' in v
 
 export const isNormal = (v: Move): v is NormalMove => 'from' in v
 
-export const RULES = [
-  'chess',
-  'antichess',
-  'kingofthehill',
-  '3check',
-  'atomic',
-  'horde',
-  'racingkings',
-  'crazyhouse'
-] as const
+export const RULES = ['makruk'] as const
 
 export type Rules = (typeof RULES)[number]
 
