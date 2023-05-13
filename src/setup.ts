@@ -1,5 +1,4 @@
 import { Color, Role, ROLES, Square, ByColor, ByRole } from './types.js'
-import { SquareSet } from './squareSet.js'
 import { Board, boardEquals } from './board.js'
 
 export class MaterialSide implements ByRole<number> {

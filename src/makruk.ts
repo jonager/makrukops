@@ -1,19 +1,5 @@
 import { Result } from '@badrap/result'
-import {
-  Rules,
-  CastlingSide,
-  CASTLING_SIDES,
-  Color,
-  COLORS,
-  Square,
-  ByColor,
-  ByCastlingSide,
-  Move,
-  NormalMove,
-  isDrop,
-  Piece,
-  Outcome
-} from './types.js'
+import { Rules, Color, COLORS, Square, Move, Piece, Outcome } from './types.js'
 import { SquareSet } from './squareSet.js'
 import { Board, boardEquals } from './board.js'
 import { Setup, Material, RemainingChecks } from './setup.js'
@@ -28,7 +14,7 @@ import {
   between,
   ray
 } from './attacks.js'
-import { kingCastlesTo, rookCastlesTo, opposite, defined, squareRank } from './util.js'
+import { opposite, defined, squareRank } from './util.js'
 
 export enum IllegalSetup {
   Empty = 'ERR_EMPTY',
@@ -44,7 +30,7 @@ const attacksTo = (square: Square, attacker: Color, board: Board, occupied: Squa
   board[attacker].intersect(
     rookAttacks(square, occupied)
       .intersect(board.rooksAndQueens())
-      .union(bishopAttacks(square, occupied).intersect(board.bishopsAndQueens()))
+      .union(bishopAttacks(opposite(attacker), square).intersect(board.bishop))
       .union(knightAttacks(square).intersect(board.knight))
       .union(kingAttacks(square).intersect(board.king))
       .union(pawnAttacks(opposite(attacker), square).intersect(board.pawn))
@@ -81,7 +67,6 @@ export abstract class Position {
 
   protected setupUnchecked(setup: Setup) {
     this.board = setup.board.clone()
-    this.board.promoted = SquareSet.empty()
     this.pockets = undefined
     this.turn = setup.turn
     this.epSquare = validEpSquare(this, setup.epSquare)
@@ -116,10 +101,7 @@ export abstract class Position {
     const king = this.board.kingOf(this.turn)
     if (!defined(king))
       return { king, blockers: SquareSet.empty(), checkers: SquareSet.empty(), variantEnd, mustCapture: false }
-    const snipers = rookAttacks(king, SquareSet.empty())
-      .intersect(this.board.rooksAndQueens())
-      .union(bishopAttacks(king, SquareSet.empty()).intersect(this.board.bishopsAndQueens()))
-      .intersect(this.board[opposite(this.turn)])
+    const snipers = rookAttacks(king, SquareSet.empty()).intersect(this.board[opposite(this.turn)])
     let blockers = SquareSet.empty()
     for (const sniper of snipers) {
       const b = between(king, sniper).intersect(this.board.occupied)
@@ -190,10 +172,10 @@ export abstract class Position {
       if (defined(this.epSquare) && canCaptureEp(this, square, ctx)) {
         legal = SquareSet.fromSquare(this.epSquare)
       }
-    } else if (piece.role === 'bishop') pseudo = bishopAttacks(square, this.board.occupied)
+    } else if (piece.role === 'bishop') pseudo = bishopAttacks(this.turn, square)
     else if (piece.role === 'knight') pseudo = knightAttacks(square)
     else if (piece.role === 'rook') pseudo = rookAttacks(square, this.board.occupied)
-    else if (piece.role === 'queen') pseudo = queenAttacks(square, this.board.occupied)
+    else if (piece.role === 'queen') pseudo = queenAttacks(square)
     else pseudo = kingAttacks(square)
 
     pseudo = pseudo.diff(this.board[this.turn])
@@ -273,16 +255,10 @@ export abstract class Position {
   }
 
   isLegal(move: Move, ctx?: Context): boolean {
-    if (isDrop(move)) {
-      if (!this.pockets || this.pockets[this.turn][move.role] <= 0) return false
-      if (move.role === 'pawn' && SquareSet.backranks().has(move.to)) return false
-      return this.dropDests(ctx).has(move.to)
-    } else {
-      if (move.promotion === 'pawn') return false
-      if (!!move.promotion !== (this.board.pawn.has(move.from) && SquareSet.backranks().has(move.to))) return false
-      const dests = this.dests(move.from, ctx)
-      return dests.has(move.to) || dests.has(normalizeMove(this, move).to)
-    }
+    if (move.promotion === 'pawn') return false
+    if (!!move.promotion !== (this.board.pawn.has(move.from) && SquareSet.backranks().has(move.to))) return false
+    const dests = this.dests(move.from, ctx)
+    return dests.has(move.to) || dests.has(normalizeMove(this, move).to)
   }
 
   isCheck(): boolean {
@@ -333,33 +309,27 @@ export abstract class Position {
     if (turn === 'black') this.fullmoves += 1
     this.turn = opposite(turn)
 
-    if (isDrop(move)) {
-      this.board.set(move.to, { role: move.role, color: turn })
-      if (this.pockets) this.pockets[turn][move.role]--
-      if (move.role === 'pawn') this.halfmoves = 0
-    } else {
-      const piece = this.board.take(move.from)
-      if (!piece) return
+    const piece = this.board.take(move.from)
+    if (!piece) return
 
-      let epCapture: Piece | undefined
-      if (piece.role === 'pawn') {
-        this.halfmoves = 0
-        if (move.to === epSquare) {
-          epCapture = this.board.take(move.to + (turn === 'white' ? -8 : 8))
-        }
-        const delta = move.from - move.to
-        if (Math.abs(delta) === 16 && 8 <= move.from && move.from <= 55) {
-          this.epSquare = (move.from + move.to) >> 1
-        }
-        if (move.promotion) {
-          piece.role = move.promotion
-          piece.promoted = !!this.pockets
-        }
+    let epCapture: Piece | undefined
+    if (piece.role === 'pawn') {
+      this.halfmoves = 0
+      if (move.to === epSquare) {
+        epCapture = this.board.take(move.to + (turn === 'white' ? -8 : 8))
       }
-
-      const capture = this.board.set(move.to, piece) || epCapture
-      if (capture) this.playCaptureAt(move.to, capture)
+      const delta = move.from - move.to
+      if (Math.abs(delta) === 16 && 8 <= move.from && move.from <= 55) {
+        this.epSquare = (move.from + move.to) >> 1
+      }
+      if (move.promotion) {
+        piece.role = move.promotion
+        piece.promoted = !!this.pockets
+      }
     }
+
+    const capture = this.board.set(move.to, piece) || epCapture
+    if (capture) this.playCaptureAt(move.to, capture)
 
     if (this.remainingChecks) {
       if (this.isCheck()) this.remainingChecks[turn] = Math.max(this.remainingChecks[turn] - 1, 0)

@@ -4,9 +4,9 @@ import { SquareSet } from './squareSet.js'
 import { Board } from './board.js'
 import { Setup, MaterialSide, Material, RemainingChecks } from './setup.js'
 import { defined, squareFile, parseSquare, makeSquare, roleToChar, charToRole, squareFromCoords } from './util.js'
-
+// todo: remove all logic for pockets
 export const INITIAL_BOARD_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
-export const INITIAL_EPD = INITIAL_BOARD_FEN + ' w KQkq -'
+export const INITIAL_EPD = INITIAL_BOARD_FEN + ' w KQkq -' // todo: fix this, we don't need castling in makruk
 export const INITIAL_FEN = INITIAL_EPD + ' 0 1'
 export const EMPTY_BOARD_FEN = '8/8/8/8/8/8/8/8'
 export const EMPTY_EPD = EMPTY_BOARD_FEN + ' w - -'

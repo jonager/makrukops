@@ -1,15 +1,4 @@
-import {
-  FILE_NAMES,
-  RANK_NAMES,
-  CastlingSide,
-  Color,
-  Square,
-  Role,
-  Move,
-  isDrop,
-  isNormal,
-  SquareName
-} from './types.js'
+import { FILE_NAMES, RANK_NAMES, CastlingSide, Color, Square, Role, Move, isNormal, SquareName } from './types.js'
 
 export const defined = <A>(v: A | undefined): v is A => v !== undefined
 
@@ -41,19 +30,21 @@ export const roleToChar = (role: Role): string => {
   }
 }
 
-export function charToRole(ch: 'p' | 'n' | 'b' | 'r' | 'q' | 'k' | 'P' | 'N' | 'B' | 'R' | 'Q' | 'K'): Role
+export function charToRole(ch: 'p' | 'n' | 's' | 'r' | 'm' | 'k' | 'P' | 'N' | 'S' | 'R' | 'M' | 'K'): Role
 export function charToRole(ch: string): Role | undefined
 export function charToRole(ch: string): Role | undefined {
   switch (ch.toLowerCase()) {
     case 'p':
       return 'pawn'
+    case 'M':
+      return 'promotedpawn'
     case 'n':
       return 'knight'
-    case 'b':
+    case 's':
       return 'bishop'
     case 'r':
       return 'rook'
-    case 'q':
+    case 'm':
       return 'queen'
     case 'k':
       return 'king'
@@ -73,11 +64,7 @@ export const makeSquare = (square: Square): SquareName =>
   (FILE_NAMES[squareFile(square)] + RANK_NAMES[squareRank(square)]) as SquareName
 
 export const parseUci = (str: string): Move | undefined => {
-  if (str[1] === '@' && str.length === 4) {
-    const role = charToRole(str[0])
-    const to = parseSquare(str.slice(2))
-    if (role && defined(to)) return { role, to }
-  } else if (str.length === 4 || str.length === 5) {
+  if (str.length === 4 || str.length === 5) {
     const from = parseSquare(str.slice(0, 2))
     const to = parseSquare(str.slice(2, 4))
     let promotion: Role | undefined
@@ -92,21 +79,12 @@ export const parseUci = (str: string): Move | undefined => {
 
 export const moveEquals = (left: Move, right: Move): boolean => {
   if (left.to !== right.to) return false
-  if (isDrop(left)) return isDrop(right) && left.role === right.role
   else return isNormal(right) && left.from === right.from && left.promotion === right.promotion
 }
 
 /**
  * Converts a move to UCI notation, like `g1f3` for a normal move,
- * `a7a8q` for promotion to a queen, and `Q@f7` for a Crazyhouse drop.
+ * `a5a6` for promotion to a promoted pawn
  */
 export const makeUci = (move: Move): string =>
-  isDrop(move)
-    ? `${roleToChar(move.role).toUpperCase()}@${makeSquare(move.to)}`
-    : makeSquare(move.from) + makeSquare(move.to) + (move.promotion ? roleToChar(move.promotion) : '')
-
-export const kingCastlesTo = (color: Color, side: CastlingSide): Square =>
-  color === 'white' ? (side === 'a' ? 2 : 6) : side === 'a' ? 58 : 62
-
-export const rookCastlesTo = (color: Color, side: CastlingSide): Square =>
-  color === 'white' ? (side === 'a' ? 3 : 5) : side === 'a' ? 59 : 61
+  makeSquare(move.from) + makeSquare(move.to) + (move.promotion ? roleToChar(move.promotion) : '')

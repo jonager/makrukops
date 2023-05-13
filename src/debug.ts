@@ -78,20 +78,6 @@ export const perft = (pos: Position, depth: number, log = false): number => {
         }
       }
     }
-    if (pos.pockets) {
-      for (const role of ROLES) {
-        if (pos.pockets[pos.turn][role] > 0) {
-          for (const to of role === 'pawn' ? dropDests.diff(SquareSet.backranks()) : dropDests) {
-            const child = pos.clone()
-            const move = { role, to }
-            child.play(move)
-            const children = perft(child, depth - 1, false)
-            if (log) console.log(makeUci(move), children)
-            nodes += children
-          }
-        }
-      }
-    }
     return nodes
   }
 }

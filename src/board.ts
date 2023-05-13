@@ -14,11 +14,6 @@ export class Board implements Iterable<[Square, Piece]>, ByRole<SquareSet>, ByCo
    * All occupied squares.
    */
   occupied: SquareSet
-  /**
-   * All squares occupied by pieces known to be promoted. This information is
-   * relevant in chess variants like Crazyhouse.
-   */
-  promoted: SquareSet // todo: verify if needed for makruk
 
   white: SquareSet
   black: SquareSet
@@ -44,7 +39,6 @@ export class Board implements Iterable<[Square, Piece]>, ByRole<SquareSet>, ByCo
    */
   reset(): void {
     this.occupied = new SquareSet(0xffff, 0xffff_0000)
-    this.promoted = SquareSet.empty()
     this.white = new SquareSet(0xffff, 0)
     this.black = new SquareSet(0, 0xffff_0000)
     this.pawn = new SquareSet(0xff00, 0x00ff_0000)
@@ -63,7 +57,6 @@ export class Board implements Iterable<[Square, Piece]>, ByRole<SquareSet>, ByCo
 
   clear(): void {
     this.occupied = SquareSet.empty()
-    this.promoted = SquareSet.empty()
     for (const color of COLORS) this[color] = SquareSet.empty()
     for (const role of ROLES) this[role] = SquareSet.empty()
   }
@@ -71,7 +64,6 @@ export class Board implements Iterable<[Square, Piece]>, ByRole<SquareSet>, ByCo
   clone(): Board {
     const board = new Board()
     board.occupied = this.occupied
-    board.promoted = this.promoted
     for (const color of COLORS) board[color] = this[color]
     for (const role of ROLES) board[role] = this[role]
     return board
@@ -94,8 +86,7 @@ export class Board implements Iterable<[Square, Piece]>, ByRole<SquareSet>, ByCo
     const color = this.getColor(square)
     if (!color) return
     const role = this.getRole(square)!
-    const promoted = this.promoted.has(square)
-    return { color, role, promoted }
+    return { color, role }
   }
 
   /**
@@ -107,7 +98,6 @@ export class Board implements Iterable<[Square, Piece]>, ByRole<SquareSet>, ByCo
       this.occupied = this.occupied.without(square)
       this[piece.color] = this[piece.color].without(square)
       this[piece.role] = this[piece.role].without(square)
-      if (piece.promoted) this.promoted = this.promoted.without(square)
     }
     return piece
   }
@@ -121,7 +111,6 @@ export class Board implements Iterable<[Square, Piece]>, ByRole<SquareSet>, ByCo
     this.occupied = this.occupied.with(square)
     this[piece.color] = this[piece.color].with(square)
     this[piece.role] = this[piece.role].with(square)
-    if (piece.promoted) this.promoted = this.promoted.with(square)
     return old
   }
 
@@ -156,6 +145,4 @@ export class Board implements Iterable<[Square, Piece]>, ByRole<SquareSet>, ByCo
 }
 
 export const boardEquals = (left: Board, right: Board): boolean =>
-  left.white.equals(right.white) &&
-  left.promoted.equals(right.promoted) &&
-  ROLES.every(role => left[role].equals(right[role]))
+  left.white.equals(right.white) && ROLES.every(role => left[role].equals(right[role]))

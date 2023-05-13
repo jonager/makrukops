@@ -8,8 +8,8 @@
  * tokens.
  *
  * ```ts
- * import { parsePgn, startingPosition } from 'chessops/pgn';
- * import { parseSan } from 'chessops/san';
+ * import { parsePgn, startingPosition } from 'makrukops/pgn';
+ * import { parseSan } from 'makrukops/san';
  *
  * const pgn = '1. d4 d5 *';
  * const games = parsePgn(pgn);
@@ -33,7 +33,7 @@
  * ```ts
  *
  * import { createReadStream } from 'fs';
- * import { PgnParser } from 'chessops/pgn';
+ * import { PgnParser } from 'makrukops/pgn';
  *
  * const stream = createReadStream('games.pgn', { encoding: 'utf-8' });
  *
@@ -66,9 +66,9 @@
  * In the example below, the current position `pos` is provided as context.
  *
  * ```ts
- * import { transform } from 'chessops/pgn';
- * import { makeFen } from 'chessops/fen';
- * import { parseSan, makeSanAndPlay } from 'chessops/san';
+ * import { transform } from 'makrukops/pgn';
+ * import { makeFen } from 'makrukops/fen';
+ * import { parseSan, makeSanAndPlay } from 'makrukops/san';
  *
  * const pos = startingPosition(game.headers).unwrap();
  * game.moves = transform(game.moves, pos, (pos, node) => {
@@ -93,7 +93,7 @@
  * Requires each node to at least have a `san` property.
  *
  * ```
- * import { makePgn } from 'chessops/pgn';
+ * import { makePgn } from 'makrukops/pgn';
  *
  * const rewrittenPgn = makePgn(game);
  * ```

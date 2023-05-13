@@ -54,22 +54,13 @@ export interface Piece {
   promoted?: boolean
 }
 
-export interface NormalMove {
+export interface Move {
   from: Square
   to: Square
   promotion?: Role
 }
 
-export interface DropMove {
-  role: Role
-  to: Square
-}
-
-export type Move = NormalMove | DropMove
-
-export const isDrop = (v: Move): v is DropMove => 'role' in v
-
-export const isNormal = (v: Move): v is NormalMove => 'from' in v
+export const isNormal = (v: Move): v is Move => 'from' in v
 
 export const RULES = ['makruk'] as const
 

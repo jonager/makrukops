@@ -1,4 +1,4 @@
-import { FILE_NAMES, RANK_NAMES, isDrop, Move, CastlingSide, SquareName } from './types.js'
+import { FILE_NAMES, RANK_NAMES, Move, SquareName } from './types.js'
 import { charToRole, defined, roleToChar, parseSquare, makeSquare, squareFile, squareRank, opposite } from './util.js'
 import { SquareSet } from './squareSet.js'
 import { Position } from './makruk.js'
@@ -6,49 +6,47 @@ import { attacks, kingAttacks, queenAttacks, rookAttacks, bishopAttacks, knightA
 
 const makeSanWithoutSuffix = (pos: Position, move: Move): string => {
   let san = ''
-  if (isDrop(move)) {
-    if (move.role !== 'pawn') san = roleToChar(move.role).toUpperCase()
-    san += '@' + makeSquare(move.to)
+
+  const role = pos.board.getRole(move.from)
+  if (!role) return '--'
+
+  if (role === 'king' && (pos.board[pos.turn].has(move.to) || Math.abs(move.to - move.from) === 2)) {
+    san = move.to > move.from ? 'O-O' : 'O-O-O'
   } else {
-    const role = pos.board.getRole(move.from)
-    if (!role) return '--'
-    if (role === 'king' && (pos.board[pos.turn].has(move.to) || Math.abs(move.to - move.from) === 2)) {
-      san = move.to > move.from ? 'O-O' : 'O-O-O'
-    } else {
-      const capture =
-        pos.board.occupied.has(move.to) || (role === 'pawn' && squareFile(move.from) !== squareFile(move.to))
-      if (role !== 'pawn') {
-        san = roleToChar(role).toUpperCase()
+    const capture =
+      pos.board.occupied.has(move.to) || (role === 'pawn' && squareFile(move.from) !== squareFile(move.to))
+    if (role !== 'pawn') {
+      san = roleToChar(role).toUpperCase()
 
-        // Disambiguation
-        let others
-        if (role === 'king') others = kingAttacks(move.to).intersect(pos.board.king)
-        else if (role === 'queen') others = queenAttacks(move.to, pos.board.occupied).intersect(pos.board.queen)
-        else if (role === 'rook') others = rookAttacks(move.to, pos.board.occupied).intersect(pos.board.rook)
-        else if (role === 'bishop') others = bishopAttacks(move.to, pos.board.occupied).intersect(pos.board.bishop)
-        else others = knightAttacks(move.to).intersect(pos.board.knight)
-        others = others.intersect(pos.board[pos.turn]).without(move.from)
-        if (others.nonEmpty()) {
-          const ctx = pos.ctx()
-          for (const from of others) {
-            if (!pos.dests(from, ctx).has(move.to)) others = others.without(from)
-          }
-          if (others.nonEmpty()) {
-            let row = false
-            let column = others.intersects(SquareSet.fromRank(squareRank(move.from)))
-            if (others.intersects(SquareSet.fromFile(squareFile(move.from)))) row = true
-            else column = true
-            if (column) san += FILE_NAMES[squareFile(move.from)]
-            if (row) san += RANK_NAMES[squareRank(move.from)]
-          }
+      // Disambiguation
+      let others
+      if (role === 'king') others = kingAttacks(move.to).intersect(pos.board.king)
+      else if (role === 'queen') others = queenAttacks(move.to).intersect(pos.board.queen)
+      else if (role === 'rook') others = rookAttacks(move.to, pos.board.occupied).intersect(pos.board.rook)
+      else if (role === 'bishop') others = bishopAttacks(pos.turn, move.to).intersect(pos.board.bishop)
+      else others = knightAttacks(move.to).intersect(pos.board.knight)
+      others = others.intersect(pos.board[pos.turn]).without(move.from)
+      if (others.nonEmpty()) {
+        const ctx = pos.ctx()
+        for (const from of others) {
+          if (!pos.dests(from, ctx).has(move.to)) others = others.without(from)
         }
-      } else if (capture) san = FILE_NAMES[squareFile(move.from)]
+        if (others.nonEmpty()) {
+          let row = false
+          let column = others.intersects(SquareSet.fromRank(squareRank(move.from)))
+          if (others.intersects(SquareSet.fromFile(squareFile(move.from)))) row = true
+          else column = true
+          if (column) san += FILE_NAMES[squareFile(move.from)]
+          if (row) san += RANK_NAMES[squareRank(move.from)]
+        }
+      }
+    } else if (capture) san = FILE_NAMES[squareFile(move.from)]
 
-      if (capture) san += 'x'
-      san += makeSquare(move.to)
-      if (move.promotion) san += '=' + roleToChar(move.promotion).toUpperCase()
-    }
+    if (capture) san += 'x'
+    san += makeSquare(move.to)
+    if (move.promotion) san += '=' + roleToChar(move.promotion).toUpperCase()
   }
+
   return san
 }
 
@@ -86,11 +84,11 @@ export const parseSan = (pos: Position, san: string): Move | undefined => {
   const match = san.match(/^([NBRQK])?([a-h])?([1-8])?[-x]?([a-h][1-8])(?:=?([nbrqkNBRQK]))?[+#]?$/) as
     | [
         string,
-        'N' | 'B' | 'R' | 'Q' | 'K' | undefined,
+        'N' | 'S' | 'R' | 'M' | 'K' | undefined,
         string | undefined,
         string | undefined,
         SquareName,
-        'n' | 'b' | 'r' | 'q' | 'k' | 'N' | 'B' | 'R' | 'Q' | 'K' | undefined
+        'n' | 's' | 'r' | 'm' | 'k' | 'N' | 'S' | 'R' | 'M' | 'K' | undefined
       ]
     | null
   if (!match) return

@@ -31,7 +31,6 @@ export const rotate180 = (s: SquareSet): SquareSet => s.rbit64()
 export const transformBoard = (board: Board, f: (s: SquareSet) => SquareSet): Board => {
   const b = Board.empty()
   b.occupied = f(board.occupied)
-  b.promoted = f(board.promoted)
   for (const color of COLORS) b[color] = f(board[color])
   for (const role of ROLES) b[role] = f(board[role])
   return b

@@ -16,10 +16,7 @@ export {
   CASTLING_SIDES,
   ByCastlingSide,
   Piece,
-  NormalMove,
-  DropMove,
   Move,
-  isDrop,
   isNormal,
   Rules,
   RULES,
@@ -29,7 +26,6 @@ export {
 export {
   charToRole,
   defined,
-  kingCastlesTo,
   makeSquare,
   makeUci,
   opposite,
