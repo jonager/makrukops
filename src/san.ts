@@ -80,8 +80,7 @@ export const makeSan = (pos: Position, move: Move): string => makeSanAndPlay(pos
 export const parseSan = (pos: Position, san: string): Move | undefined => {
   const ctx = pos.ctx()
 
-  // Normal move
-  const match = san.match(/^([NBRQK])?([a-h])?([1-8])?[-x]?([a-h][1-8])(?:=?([nbrqkNBRQK]))?[+#]?$/) as
+  const match = san.match(/^([NSRMK])?([a-h])?([1-8])?[-x]?([a-h][1-8])(?:=?([nsrmkNSRMK]))?[+#]?$/) as
     | [
         string,
         'N' | 'S' | 'R' | 'M' | 'K' | undefined,

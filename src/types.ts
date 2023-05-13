@@ -31,21 +31,10 @@ export const ROLES = ['pawn', 'promotedpawn', 'knight', 'bishop', 'rook', 'queen
 export type Role = (typeof ROLES)[number]
 
 /**
- * Indexable by `pawn`, `knight`, `bishop`, `rook`, `queen`, and `king`.
+ * Indexable by `pawn`, `promotedpawn`, `knight`, `bishop`, `rook`, `queen`, and `king`.
  */
 export type ByRole<T> = {
   [role in Role]: T
-}
-
-export const CASTLING_SIDES = ['a', 'h'] as const
-
-export type CastlingSide = (typeof CASTLING_SIDES)[number]
-
-/**
- * Indexable by `a` and `h`.
- */
-export type ByCastlingSide<T> = {
-  [side in CastlingSide]: T
 }
 
 export interface Piece {

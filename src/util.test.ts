@@ -8,7 +8,6 @@ test('parse uci', () => {
 })
 
 test('make uci', () => {
-  expect(makeUci({ role: 'queen', to: 1 })).toBe('Q@b1')
   expect(makeUci({ from: 2, to: 3 })).toBe('c1d1')
   expect(makeUci({ from: 0, to: 0, promotion: 'pawn' })).toBe('a1a1p')
 })

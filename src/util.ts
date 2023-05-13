@@ -1,4 +1,4 @@
-import { FILE_NAMES, RANK_NAMES, CastlingSide, Color, Square, Role, Move, isNormal, SquareName } from './types.js'
+import { FILE_NAMES, RANK_NAMES, Color, Square, Role, Move, isNormal, SquareName } from './types.js'
 
 export const defined = <A>(v: A | undefined): v is A => v !== undefined
 
