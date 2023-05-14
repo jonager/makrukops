@@ -3,8 +3,7 @@ import { parseUci, makeUci } from './util.js'
 
 test('parse uci', () => {
   expect(parseUci('a1a2')).toEqual({ from: 0, to: 8 })
-  expect(parseUci('h7h8k')).toEqual({ from: 55, to: 63, promotion: 'king' })
-  expect(parseUci('P@h1')).toEqual({ role: 'pawn', to: 7 })
+  expect(parseUci('h7h8q')).toEqual({ from: 55, to: 63, promotion: 'queen' })
 })
 
 test('make uci', () => {

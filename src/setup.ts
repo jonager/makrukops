@@ -126,13 +126,11 @@ export class RemainingChecks implements ByColor<number> {
 }
 
 /**
- * A not necessarily legal chess or chess variant position.
+ * A not necessarily legal makruk position.
  */
 export interface Setup {
   board: Board
-  pockets: Material | undefined
   turn: Color
-  epSquare: Square | undefined
   remainingChecks: RemainingChecks | undefined
   halfmoves: number
   fullmoves: number
@@ -140,9 +138,7 @@ export interface Setup {
 
 export const defaultSetup = (): Setup => ({
   board: Board.default(),
-  pockets: undefined,
   turn: 'white',
-  epSquare: undefined,
   remainingChecks: undefined,
   halfmoves: 0,
   fullmoves: 1
@@ -150,9 +146,7 @@ export const defaultSetup = (): Setup => ({
 
 export const setupClone = (setup: Setup): Setup => ({
   board: setup.board.clone(),
-  pockets: setup.pockets?.clone(),
   turn: setup.turn,
-  epSquare: setup.epSquare,
   remainingChecks: setup.remainingChecks?.clone(),
   halfmoves: setup.halfmoves,
   fullmoves: setup.fullmoves
@@ -160,9 +154,7 @@ export const setupClone = (setup: Setup): Setup => ({
 
 export const setupEquals = (left: Setup, right: Setup): boolean =>
   boardEquals(left.board, right.board) &&
-  ((right.pockets && left.pockets?.equals(right.pockets)) || (!left.pockets && !right.pockets)) &&
   left.turn === right.turn &&
-  left.epSquare === right.epSquare &&
   ((right.remainingChecks && left.remainingChecks?.equals(right.remainingChecks)) ||
     (!left.remainingChecks && !right.remainingChecks)) &&
   left.halfmoves === right.halfmoves &&

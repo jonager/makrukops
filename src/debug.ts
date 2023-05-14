@@ -49,9 +49,8 @@ export const perft = (pos: Position, depth: number, log = false): number => {
   const promotionRoles: Role[] = ['promotedpawn']
 
   const ctx = pos.ctx()
-  const dropDests = pos.dropDests(ctx)
 
-  if (!log && depth === 1 && dropDests.isEmpty()) {
+  if (!log && depth === 1) {
     // Optimization for leaf nodes.
     let nodes = 0
     for (const [from, to] of pos.allDests(ctx)) {

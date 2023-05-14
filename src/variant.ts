@@ -8,12 +8,11 @@ import {
   Context,
   Makruk,
   equalsIgnoreMoves,
-  normalizeMove,
   isStandardMaterialSide,
   isImpossibleCheck
 } from './makruk.js'
 
-export { Position, PositionError, IllegalSetup, Context, Makruk, equalsIgnoreMoves, normalizeMove, isImpossibleCheck }
+export { Position, PositionError, IllegalSetup, Context, Makruk, equalsIgnoreMoves, isImpossibleCheck }
 
 export const defaultPosition = (rules: Rules): Position => {
   switch (rules) {

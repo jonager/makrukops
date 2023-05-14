@@ -1,8 +1,7 @@
 import { expect, test } from '@jest/globals'
-import { SquareSet } from './squareSet.js'
 import { parseUci } from './util.js'
-import { parseFen, makeFen, INITIAL_FEN } from './fen.js'
-import { isImpossibleCheck, Makruk, normalizeMove } from './makruk.js'
+import { parseFen, makeFen } from './fen.js'
+import { isImpossibleCheck, Makruk } from './makruk.js'
 import { perft } from './debug.js'
 
 const tricky: [string, string, number, number, number, number?, number?][] = [
@@ -25,25 +24,13 @@ const tricky: [string, string, number, number, number, number?, number?][] = [
   ['king-walk', '8/8/8/B2p3Q/2qPp1P1/b7/2P2PkP/4K2R b K -', 26, 611, 14583, 366807],
   ['a1-check', '4k3/5p2/5p1p/8/rbR5/1N6/5PPP/5K2 b - - 1 29', 22, 580, 12309],
 
-  // https://github.com/ornicar/lila/issues/4625
-  [
-    'hside-rook-blocks-aside-castling',
-    '4rrk1/pbbp2p1/1ppnp3/3n1pqp/3N1PQP/1PPNP3/PBBP2P1/4RRK1 w Ff -',
-    42,
-    1743,
-    71908
-  ],
-
   // Impossible checker alignment
   ['align-diag-1', '3R4/8/q4k2/2B5/1NK5/3b4/8/8 w - -', 4, 125, 2854],
   ['align-diag-2', '2Nq4/2K5/1b6/8/7R/3k4/7P/8 w - -', 3, 81, 1217],
   ['align-horizontal', '5R2/2P5/8/4k3/8/3rK2r/8/8 w - -', 2, 56, 1030],
   ['align-ep', '8/8/8/1k6/3Pp3/8/8/4KQ2 b - d3', 6, 121, 711],
   ['align-ep-pinned', '1b1k4/8/8/1rPpK3/8/8/8/8 w - d6', 5, 100, 555],
-  ['ep-unrelated-check', 'rnbqk1nr/bb3p1p/1q2r3/2pPp3/3P4/7P/1PP1NpPP/R1BQKBNR w KQkq c6', 2, 92, 2528],
-
-  // Impossible castling rights
-  ['asymmetrical-and-king-on-h', 'r2r3k/p7/3p4/8/8/P6P/8/R3K2R b KQq -', 14, 206, 3672, 64639, 1320962]
+  ['ep-unrelated-check', 'rnbqk1nr/bb3p1p/1q2r3/2pPp3/3P4/7P/1PP1NpPP/R1BQKBNR w KQkq c6', 2, 92, 2528]
 ]
 
 const random: [string, string, number, number, number, number, number][] = [
@@ -144,12 +131,4 @@ test('king captures unmoved rook', () => {
   expect(pos.isLegal(move)).toBe(true)
   pos.play(move)
   expect(makeFen(pos.toSetup())).toBe('8/8/8/B2p3Q/2qPp1P1/b7/2P2P1P/4K2k w - - 0 2')
-})
-
-test('en passant and unrelated check', () => {
-  const setup = parseFen('rnbqk1nr/bb3p1p/1q2r3/2pPp3/3P4/7P/1PP1NpPP/R1BQKBNR w KQkq c6').unwrap()
-  const pos = Makruk.fromSetup(setup).unwrap()
-  expect(isImpossibleCheck(pos)).toBe(true)
-  const enPassant = parseUci('d5c6')!
-  expect(pos.isLegal(enPassant)).toBe(false)
 })

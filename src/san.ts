@@ -22,6 +22,7 @@ const makeSanWithoutSuffix = (pos: Position, move: Move): string => {
       let others
       if (role === 'king') others = kingAttacks(move.to).intersect(pos.board.king)
       else if (role === 'queen') others = queenAttacks(move.to).intersect(pos.board.queen)
+      else if (role === 'promotedpawn') others = queenAttacks(move.to).intersect(pos.board.promotedpawn)
       else if (role === 'rook') others = rookAttacks(move.to, pos.board.occupied).intersect(pos.board.rook)
       else if (role === 'bishop') others = bishopAttacks(pos.turn, move.to).intersect(pos.board.bishop)
       else others = knightAttacks(move.to).intersect(pos.board.knight)

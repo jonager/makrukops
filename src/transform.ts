@@ -1,5 +1,4 @@
 import { ROLES, COLORS } from './types.js'
-import { defined } from './util.js'
 import { SquareSet } from './squareSet.js'
 import { Board } from './board.js'
 import { Setup } from './setup.js'
@@ -38,9 +37,7 @@ export const transformBoard = (board: Board, f: (s: SquareSet) => SquareSet): Bo
 
 export const transformSetup = (setup: Setup, f: (s: SquareSet) => SquareSet): Setup => ({
   board: transformBoard(setup.board, f),
-  pockets: setup.pockets?.clone(),
   turn: setup.turn,
-  epSquare: defined(setup.epSquare) ? f(SquareSet.fromSquare(setup.epSquare)).first() : undefined,
   remainingChecks: setup.remainingChecks?.clone(),
   halfmoves: setup.halfmoves,
   fullmoves: setup.fullmoves

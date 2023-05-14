@@ -16,7 +16,7 @@ export const roleToChar = (role: Role): string => {
     case 'pawn':
       return 'p'
     case 'promotedpawn':
-      return 'M'
+      return 'm~'
     case 'knight':
       return 'n'
     case 'bishop':
@@ -30,13 +30,15 @@ export const roleToChar = (role: Role): string => {
   }
 }
 
-export function charToRole(ch: 'p' | 'n' | 's' | 'r' | 'm' | 'k' | 'P' | 'N' | 'S' | 'R' | 'M' | 'K'): Role
+export function charToRole(
+  ch: 'p' | 'm~' | 'n' | 's' | 'r' | 'm' | 'k' | 'P' | 'M~' | 'N' | 'S' | 'R' | 'M' | 'K'
+): Role
 export function charToRole(ch: string): Role | undefined
 export function charToRole(ch: string): Role | undefined {
   switch (ch.toLowerCase()) {
     case 'p':
       return 'pawn'
-    case 'M':
+    case 'm~':
       return 'promotedpawn'
     case 'n':
       return 'knight'

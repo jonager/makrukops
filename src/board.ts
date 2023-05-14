@@ -37,6 +37,7 @@ export class Board implements Iterable<[Square, Piece]>, ByRole<SquareSet>, ByCo
   /**
    * Resets all pieces to the default starting position for standard makruk.
    */
+  // todo: adapt this to makruk
   reset(): void {
     this.occupied = new SquareSet(0xffff, 0xffff_0000)
     this.white = new SquareSet(0xffff, 0)
@@ -126,14 +127,6 @@ export class Board implements Iterable<[Square, Piece]>, ByRole<SquareSet>, ByCo
 
   pieces(color: Color, role: Role): SquareSet {
     return this[color].intersect(this[role])
-  }
-
-  rooksAndQueens(): SquareSet {
-    return this.rook.union(this.queen)
-  }
-
-  bishopsAndQueens(): SquareSet {
-    return this.bishop.union(this.queen)
   }
 
   /**
